@@ -7,6 +7,7 @@ import sqlite3
 def showAllStudents():
     zeiger.execute("Select * From Student;")
     res = zeiger.fetchall()
+    print("Alle eingetragenen Studenten:")
     for data in res:
         print(data[0] + ", " + data[1] + ", " + data[2] + ", " + data[3] + ", " + data[4] + ", " + data[5])
     print()
@@ -23,7 +24,7 @@ def deleteStudent():
     global cb
     if (len(cb["values"]) > 0) & (cb.get() != ''):
         student = cb.get()
-        matrNr = student.split(', ')[2]
+        matrNr = student.split('/')[2]
         print("---",matrNr,"---")
         zeiger.execute("DELETE FROM Student Where matrikelnummer = " + matrNr)
         connection.commit()
@@ -59,24 +60,20 @@ def dataisValid():
         return False
     return True
 
-def insertedData():
+def insertData():
     zeiger.execute("SELECT * FROM Student;")
     studentslist = []
     for data in zeiger.fetchall():
-        studentslist.append(data[0] + ", " + data[1] + ", " + data[2] + ", " + data[3] + ", " + data[4] + ", " + data[5])
+        studentslist.append(data[0] + "/" + data[1] + "/" + data[2] + "/" + data[3] + "/" + data[4] + "/" + data[5])
     return studentslist
 
 def saveData():
     if dataisValid():
-        #zeiger.execute("DELETE FROM Student;")
-        #connection.commit()
         zeiger.execute("INSERT INTO Student VALUES ('" + vorname.get() + "', '" + nachname.get() + "', " + matrikelnummer.get() + ", " + alter.get() + ", '" + geschlecht.get() + "', " + semester.get() + ");")
         connection.commit()     # Committen ist wirklich wichtig, bevor naechste Operation ausgefuehrt wird
         deleteEntries()
         print("Daten erfolgreich gespeichert.")
-        cb["values"] = insertedData()
-
-
+        cb["values"] = insertData()
 
 def closing():
     connection.commit()
@@ -118,17 +115,14 @@ if __name__ == '__main__':
     tk.Entry(master, textvariable=geschlecht).grid(row=4, column=1)
     tk.Entry(master, textvariable=semester).grid(row=5, column=1)
 
-    tk.Button(master, text='Schließen', command=closing).grid(row=7, column=0, pady=4)
-    tk.Button(master, text='Save', command=saveData).grid(row=6, column=0, pady=4)
-    tk.Button(master, text='Anzeigen', command=showAllStudents).grid(row=7, column=1, pady=4)
-    tk.Button(master, text='Löschen', command=deleteStudent).grid(row=0, column=3, pady=4)
+    tk.Button(master, text='Quit', command=closing).grid(row=7, column=3, pady=4)
+    tk.Button(master, text='Save', command=saveData, width=20).grid(row=6, column=1, pady=4)
+    tk.Button(master, text='Show', command=showAllStudents).grid(row=7, column=1, pady=4)
+    tk.Button(master, text='Delete', command=deleteStudent).grid(row=0, column=3, pady=4)
 
-    studentslist = insertedData()
-    #insertData()
-
+    studentslist = insertData()
     cb = ttk.Combobox(master, state="readonly", values=studentslist)
-    cb.grid(row=0, column=2, pady=5)
+    cb.grid(row=0, column=2, pady=5, padx=10)
     if len(list(cb["values"])) > 0:
         cb.current(0)
-    print("Studentslist:",studentslist)
     tk.mainloop()
