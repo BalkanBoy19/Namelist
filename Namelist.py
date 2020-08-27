@@ -25,7 +25,7 @@ def deleteStudent():
     if (len(cb["values"]) > 0) & (cb.get() != ''):
         student = cb.get()
         matrNr = student.split('/')[2]
-        print("---",matrNr,"---")
+        print("---",matrNr,"wurde geloescht ---")
         zeiger.execute("DELETE FROM Student Where matrikelnummer = " + matrNr)
         connection.commit()
 
@@ -41,22 +41,33 @@ def deleteStudent():
 
 def dataisValid():
     if any(letter.isdigit() for letter in vorname.get()) | (vorname.get() == ''):
+        print("Bitte einen Vornamen ins Feld 'Vorname' eintragen.")
         return False
     if any(letter.isdigit() for letter in nachname.get()) | (nachname.get() == ''):
+        print("Bitte einen Nachnamen ins Feld 'Nachname' eintragen.")
         return False
-    if any((not digit.isdigit() | (len(matrikelnummer.get()) != 7)) for digit in matrikelnummer.get()):
+    if any((not digit.isdigit()) for digit in matrikelnummer.get()) | (len(matrikelnummer.get()) != 7):
+        print("Bitte eine Matrikelnummer mit genau 7 Ziffern ins Feld 'Matrikelnummer' eintragen.")
         return False
-    if any((not digit.isdigit() |(len(alter.get()) not in [1, 2])) for digit in alter.get()):
+    if any(not digit.isdigit() for digit in alter.get()) |(alter.get() == ''):
+        print("Bitte nur Zahlen ins Feld 'Alter' eintragen")
         return False
+    else:
+        age = int(alter.get())   # wird nur ausgefuehrt wenn es auf jeden Fall eine Zahl ist, kann also keine Exception auslösen
+        if (age <= 14) | (age >= 50):
+            print("Bitte ein Alter zwischen 14 und 50 ins Feld 'Alter' eintragen.")
+            return False
     if geschlecht.get() not in ['m', 'w']:
+        print("Bitte nur 'm' oder 'w' ins Feld 'Geschlecht' eintragen")
         return False
     if any(not digit.isdigit() for digit in semester.get()) | (semester.get() == ''):
+        print("Bitte nur eine Zahl zwischen 1 und 20 ins Feld 'Semester' eintragen")
         return False
     zeiger.execute("SELECT * FROM Student Where matrikelnummer = " + matrikelnummer.get())
     connection.commit()
     res = zeiger.fetchone()
     if res != None:
-        print("Ein anderer Student ist bereits unter dieser Matrikelnummer eingetragen.")
+        print("Die Matrikelnummer",matrikelnummer.get(),"ist bereits vergeben.")
         return False
     return True
 
@@ -79,6 +90,7 @@ def closing():
     connection.commit()
     connection.close()
     master.quit()
+    print("Anwendung wurde beendet")
 
 if __name__ == '__main__':
     master = tk.Tk()
